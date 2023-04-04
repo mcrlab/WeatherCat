@@ -1,0 +1,4 @@
+.env
+venv
+images.db
+images/*.jpg
