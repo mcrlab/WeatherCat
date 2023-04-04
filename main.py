@@ -45,6 +45,7 @@ class MainWindow():
         self.weather_image_number = 0
         # set first image on canvas
         self.image_on_canvas = self.canvas.create_image(0, 0, anchor='nw', image=self.weather_images[self.weather_image_number])
+        self.canvas.tag_bind(self.image_on_canvas, '<Double-Button-1>', lambda e: self.close_window())
         self.canvas.tag_bind(self.image_on_canvas, '<Button-1>', lambda e: self.rotateImage())
         self.main.after(1000 * 60 * 30, self.fetchWeather)
 
