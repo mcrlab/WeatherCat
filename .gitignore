@@ -2,3 +2,4 @@
 venv
 images.db
 images/*.jpg
+__pycache__
