@@ -19,7 +19,7 @@ class CatService():
     
     def find_cats(self, description):
         images = self.directory.find(description)
-        if len(images) > 5:
+        if len(images) > 10:
             #cat images found
             return images
         else:
