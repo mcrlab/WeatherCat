@@ -25,7 +25,7 @@ class MainWindow():
         self.fetchWeather()
         self.main.attributes("-fullscreen", True)
         self.main.bind("<Escape>", lambda e: self.close_window())
-        self.main.after(1000 * 30, self.autoRotateImage)
+        self.main.after(1000 * 60, self.autoRotateImage)
 
     #----------------
     def close_window(self):
@@ -47,22 +47,19 @@ class MainWindow():
         self.image_on_canvas = self.canvas.create_image(0, 0, anchor='nw', image=self.weather_images[self.weather_image_number])
         self.canvas.tag_bind(self.image_on_canvas, '<Double-Button-1>', lambda e: self.close_window())
         self.canvas.tag_bind(self.image_on_canvas, '<Button-1>', lambda e: self.rotateImage(e))
-        self.main.after(1000 * 60 * 30, self.fetchWeather)
+        self.main.after(1000 * 60 * 15, self.fetchWeather)
 
     def autoRotateImage(self):
-        self.rotateImage()
-        self.main.after(1000 * 30, self.rotateImage)
+        self.rotateImage(None)
+        self.main.after(1000 * 60, self.autoRotateImage)
 
-    def rotateImage(self, event):
-        print(event.x)
-        if event.x < (720 / 2):
+    def rotateImage(self, event=None):
+        if event is None:
+            self.weather_image_number += 1
+        elif event.x < (720 / 2):
             self.weather_image_number -= 1
-            
         else:
             self.weather_image_number += 1
-
-
-
 
         if self.weather_image_number < 0:
             self.weather_image_number = len(self.weather_images) - 1
@@ -76,6 +73,9 @@ class MainWindow():
 
 #----------------------------------------------------------------------
 if __name__ == "__main__":
-    root = tk.Tk()
-    MainWindow(root)
-    root.mainloop()
+    try:
+        root = tk.Tk()
+        MainWindow(root)
+        root.mainloop()
+    except KeyboardInterrupt:
+        pass
