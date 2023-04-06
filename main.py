@@ -104,18 +104,17 @@ class MainWindow():
         point = (event.x, event.y)
         quadrant = where_is_the_click(point)
 
-        match quadrant:
-            case 0:
-                self.close_window()
-            case 1:
-                self.rotateImage(1)
-            case 2:
-                self.show_data = not self.show_data
-                self.render_image()
-            case 3:
-                self.rotateImage(-1)
-            case _:
-                print("quadrant not clicked")
+        if quadrant == 0:
+            self.close_window()
+        elif quadrant == 1:
+            self.rotateImage(1)
+        elif quadrant == 2:
+            self.show_data = not self.show_data
+            self.render_image()
+        elif quadrant == 3:
+            self.rotateImage(-1)
+        else:
+            print("quadrant not clicked")
 
     def rotateImage(self, direction=1):
 
