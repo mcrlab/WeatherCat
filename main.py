@@ -78,9 +78,9 @@ class MainWindow():
         if event.y < 100:
             self.close_window()
         else:
-            if event.x < 100:
+            if event.x < 150:
                 self.rotateImage(-1)
-            elif event.x > 620:
+            elif event.x > 570:
                 self.rotateImage(1)
             else: 
                 self.show_data = not self.show_data
