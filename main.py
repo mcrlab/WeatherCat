@@ -52,6 +52,8 @@ class MainWindow():
         self.image_on_canvas = self.canvas.create_image(0, 0, anchor='nw', image=self.loading_image)
 
         self.show_data = False
+        self.data_count = -1
+
         self.main.attributes("-fullscreen", True)
         self.main.bind("<Escape>", lambda e: self.close_window())
         self.main.after(1000 * 5, self.fetchWeather)
@@ -109,12 +111,17 @@ class MainWindow():
         elif quadrant == 1:
             self.rotateImage(1)
         elif quadrant == 2:
-            self.show_data = not self.show_data
-            self.render_image()
+            self.rotateData()
         elif quadrant == 3:
             self.rotateImage(-1)
         else:
             print("quadrant not clicked")
+    
+    def rotateData(self):
+        self.data_count += 1
+        if self.data_count > 2:
+            self.data_count = -1
+        self.render_image()
 
     def rotateImage(self, direction=1):
 
@@ -134,13 +141,15 @@ class MainWindow():
             background = background.convert("RGBA")
             image_to_render = Image.new('RGBA',(720, 720),(255,255,255,0))
             draw = ImageDraw.Draw(image_to_render)
-            if self.show_data:
-                temperature = "{:.1f}°c".format(self.current_weather.temperature)
-                pressure = "{0}mb".format(self.current_weather.pressure)
-                description = self.current_weather.description
-                width, height = draw.textsize(description,font=font)
+            if self.data_count > -1:
+                data = [
+                    "{:.1f}°c".format(self.current_weather.temperature),
+                    "{0}mb".format(self.current_weather.pressure),
+                    self.current_weather.description
+                ]
+                width, height = draw.textsize(data[self.data_count],font=font)
                 draw.rectangle(((720 / 2)-((width / 2) + 20), (720 / 2) - ((height/2)+20), (720 / 2)+((width / 2)+20), (720 / 2)+((height / 2)+20)), fill=(255,255,255,180))
-                draw.text((720/2,720/2),description,(38,38,38),font, anchor="mm")
+                draw.text((720/2,720/2),data[self.data_count],(38,38,38),font, anchor="mm")
 
             out = Image.alpha_composite(background, image_to_render)
             self.current_image = ImageTk.PhotoImage(out)
