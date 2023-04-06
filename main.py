@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk, ImageDraw, ImageFont
 from WeatherCat.weather import WeatherService
-from WeatherCat.ai import CatService
+from WeatherCat.ai import CatService, CatNotCreatedException
 from dotenv import load_dotenv
 import sqlite3
 
@@ -22,10 +22,23 @@ class MainWindow():
         self.canvas.pack()
         self.canvas.grid(row=0, column=0)
         
-        self.fetchWeather()
+        self.generate_app_images()        
+        self.image_on_canvas = self.canvas.create_image(0, 0, anchor='nw', image=self.loading_image)
+
+        
         self.main.attributes("-fullscreen", True)
         self.main.bind("<Escape>", lambda e: self.close_window())
+        self.main.after(1000 * 5, self.fetchWeather)
         self.main.after(1000 * 60, self.autoRotateImage)
+    
+    def generate_app_images(self):
+        i = Image.open('assets/error.jpg')
+        resized_image = i.resize((720,720))
+        self.error_image = ImageTk.PhotoImage(resized_image)
+
+        i = Image.open('assets/loading.jpg')
+        resized_image = i.resize((720,720))
+        self.loading_image = ImageTk.PhotoImage(resized_image)
 
     #----------------
     def close_window(self):
@@ -34,20 +47,28 @@ class MainWindow():
             self.main.destroy()
 
     def fetchWeather(self):
-        weather_description = self.weather_service.fetch_description()
-        self.weather_images = []
-        images = self.cat_service.find_cats(weather_description)
-        for image in images:
-            i = Image.open(image[2])
-            resized_image = i.resize((720,720))
-            self.weather_images.append(ImageTk.PhotoImage(resized_image))
- 
-        self.weather_image_number = 0
-        # set first image on canvas
-        self.image_on_canvas = self.canvas.create_image(0, 0, anchor='nw', image=self.weather_images[self.weather_image_number])
-        self.canvas.tag_bind(self.image_on_canvas, '<Double-Button-1>', lambda e: self.close_window())
-        self.canvas.tag_bind(self.image_on_canvas, '<Button-1>', lambda e: self.rotateImage(e))
-        self.main.after(1000 * 60 * 15, self.fetchWeather)
+        try:
+            retry_time = 60 * 15 # 15 minutes
+            
+            weather_description = self.weather_service.fetch_description()
+            self.weather_images = []
+            images = self.cat_service.find_cats(weather_description)
+            for image in images:
+                i = Image.open(image[2])
+                resized_image = i.resize((720,720))
+                self.weather_images.append(ImageTk.PhotoImage(resized_image))
+    
+            self.weather_image_number = 0
+            # set first image on canvas
+            self.image_on_canvas = self.canvas.create_image(0, 0, anchor='nw', image=self.weather_images[self.weather_image_number])
+            self.canvas.tag_bind(self.image_on_canvas, '<Double-Button-1>', lambda e: self.close_window())
+            self.canvas.tag_bind(self.image_on_canvas, '<Button-1>', lambda e: self.rotateImage(e))
+        except (Exception, CatNotCreatedException) as e:
+            print(e)
+            self.canvas.itemconfig(self.image_on_canvas, image=self.error_image)
+            retry_time = 60 * 1
+        finally:
+            self.main.after(1000 * retry_time, self.fetchWeather)
 
     def autoRotateImage(self):
         self.rotateImage(None)
@@ -66,9 +87,12 @@ class MainWindow():
 
         if self.weather_image_number == len(self.weather_images):
             self.weather_image_number = 0
+        try:
+            self.canvas.itemconfig(self.image_on_canvas, image=self.weather_images[self.weather_image_number])
+        except Exception as e:
+            print("Could not rotate image")
+            pass
 
-        self.canvas.itemconfig(self.image_on_canvas, image=self.weather_images[self.weather_image_number])
-        
 
 
 #----------------------------------------------------------------------

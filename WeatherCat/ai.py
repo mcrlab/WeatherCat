@@ -59,6 +59,9 @@ class CatService():
             self.directory.insert(weather_description, file_name)
             return self.directory.find(weather_description)
         except Exception as e:
-            raise Exception("Can't generate a new cat")
+            raise CatNotCreatedException("Can't generate a new cat")
         
 
+class CatNotCreatedException(Exception):
+    "cat could not be created"
+    pass

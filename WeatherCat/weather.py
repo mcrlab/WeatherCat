@@ -18,3 +18,7 @@ class WeatherService():
             return weather_description
         except Exception as e:
             return "clear sky"
+        
+class WeatherNotLoadedException(Exception):
+    """Weather not loaded"""
+    pass
