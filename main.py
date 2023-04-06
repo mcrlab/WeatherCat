@@ -99,7 +99,7 @@ class MainWindow():
 
     def render_image(self):
         try:
-            font = ImageFont.truetype("fonts/Rubik-VariableFont_wght.ttf", 120, encoding="unic")
+            font = ImageFont.truetype("fonts/Rubik-VariableFont_wght.ttf", 75, encoding="unic")
             background = self.weather_images[self.weather_image_number]
             background = background.convert("RGBA")
             image_to_render = Image.new('RGBA',(720, 720),(255,255,255,0))
@@ -107,9 +107,10 @@ class MainWindow():
             if self.show_data:
                 temperature = "{:.1f}°c".format(self.current_weather.temperature)
                 pressure = "{0}mb".format(self.current_weather.pressure)
-                width, height = draw.textsize(temperature,font=font)
+                description = self.current_weather.description
+                width, height = draw.textsize(description,font=font)
                 draw.rectangle(((720 / 2)-((width / 2) + 20), (720 / 2) - ((height/2)+20), (720 / 2)+((width / 2)+20), (720 / 2)+((height / 2)+20)), fill=(255,255,255,180))
-                draw.text((720/2,720/2),temperature,(38,38,38),font, anchor="mm")
+                draw.text((720/2,720/2),description,(38,38,38),font, anchor="mm")
 
             out = Image.alpha_composite(background, image_to_render)
             self.current_image = ImageTk.PhotoImage(out)
