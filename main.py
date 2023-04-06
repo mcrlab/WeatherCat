@@ -61,8 +61,8 @@ class MainWindow():
             self.weather_image_number = 0
             # set first image on canvas
             self.image_on_canvas = self.canvas.create_image(0, 0, anchor='nw', image=self.weather_images[self.weather_image_number])
-            self.canvas.tag_bind(self.image_on_canvas, '<Double-Button-1>', lambda e: self.close_window())
-            self.canvas.tag_bind(self.image_on_canvas, '<Button-1>', lambda e: self.rotateImage(e))
+
+            self.canvas.tag_bind(self.image_on_canvas, '<Button-1>', lambda e: self.handleClick(e))
         except (Exception, CatNotCreatedException) as e:
             print(e)
             self.canvas.itemconfig(self.image_on_canvas, image=self.error_image)
@@ -71,16 +71,21 @@ class MainWindow():
             self.main.after(1000 * retry_time, self.fetchWeather)
 
     def autoRotateImage(self):
-        self.rotateImage(None)
+        self.rotateImage(1)
         self.main.after(1000 * 60, self.autoRotateImage)
 
-    def rotateImage(self, event=None):
-        if event is None:
-            self.weather_image_number += 1
-        elif event.x < (720 / 2):
-            self.weather_image_number -= 1
+    def handleClick(self, event):
+        if event.y < 100:
+            self.close_window()
         else:
-            self.weather_image_number += 1
+            if event.x < 100:
+                self.rotateImage(-1)
+            elif event.x > 620:
+                self.rotateImage(1)
+
+    def rotateImage(self, direction=1):
+
+        self.weather_image_number += direction
 
         if self.weather_image_number < 0:
             self.weather_image_number = len(self.weather_images) - 1
