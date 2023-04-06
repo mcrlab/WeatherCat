@@ -3,3 +3,4 @@ venv
 images.db
 images/*.jpg
 __pycache__
+.DS_Store

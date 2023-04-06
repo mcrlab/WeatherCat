@@ -49,18 +49,18 @@ class MainWindow():
     def fetchWeather(self):
         try:
             retry_time = 60 * 15 # 15 minutes
-            
-            weather_description = self.weather_service.fetch_description()
+            self.current_weather =  self.weather_service.fetch_weather()
+            weather_description =self.current_weather.description
             self.weather_images = []
             images = self.cat_service.find_cats(weather_description)
             for image in images:
                 i = Image.open(image[2])
                 resized_image = i.resize((720,720))
-                self.weather_images.append(ImageTk.PhotoImage(resized_image))
+                self.weather_images.append(resized_image)
     
             self.weather_image_number = 0
             # set first image on canvas
-            self.image_on_canvas = self.canvas.create_image(0, 0, anchor='nw', image=self.weather_images[self.weather_image_number])
+            self.render_image()
 
             self.canvas.tag_bind(self.image_on_canvas, '<Button-1>', lambda e: self.handleClick(e))
         except (Exception, CatNotCreatedException) as e:
@@ -92,12 +92,21 @@ class MainWindow():
 
         if self.weather_image_number == len(self.weather_images):
             self.weather_image_number = 0
+        self.render_image()
+
+    def render_image(self):
         try:
-            self.canvas.itemconfig(self.image_on_canvas, image=self.weather_images[self.weather_image_number])
+            font = ImageFont.truetype("fonts/Rubik-VariableFont_wght.ttf", 120, encoding="unic")
+            image_to_render = self.weather_images[self.weather_image_number]
+            draw = ImageDraw.Draw(image_to_render)
+            temperature = "{:.1f}°c".format(self.current_weather.temperature)
+            pressure = "{0}mb".format(self.current_weather.pressure)
+            draw.text((720/2,720/2),temperature,(38,38,38),font, anchor="mm",  stroke_width=2, stroke_fill=(50,50,50))
+            self.current_image = ImageTk.PhotoImage(image_to_render)
+            self.canvas.itemconfig(self.image_on_canvas, image=self.current_image)
         except Exception as e:
             print("Could not rotate image")
             pass
-
 
 
 #----------------------------------------------------------------------
