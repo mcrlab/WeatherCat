@@ -8,6 +8,32 @@ import sqlite3
 
 load_dotenv()
 
+def in_a_triangle(triangle, point):
+    x1,y1 = triangle[0] 
+    x2,y2 = triangle[1]
+    x3,y3 = triangle[2]
+    xp,yp = point
+
+    c1 = (x2-x1)*(yp-y1)-(y2-y1)*(xp-x1)
+    c2 = (x3-x2)*(yp-y2)-(y3-y2)*(xp-x2)
+    c3 = (x1-x3)*(yp-y3)-(y1-y3)*(xp-x3)
+    return (c1<0 and c2<0 and c3<0) or (c1>0 and c2>0 and c3>0)
+
+def where_is_the_click(point):
+    
+    top = ((0,0),(360,360),(720,0))
+    right = ((720,0),(360,360),(720,720))
+    bottom = ((0,720),(360,360),(720,720))
+    left = ((0,0),(360,360),(0,720))
+    triangles = [
+        top, right, bottom, left
+    ]
+    i = -1
+    for triangle in triangles:
+        i += 1
+        if in_a_triangle(triangle, point):
+            return i
+    return i
 class MainWindow():
 
     #----------------
@@ -75,16 +101,21 @@ class MainWindow():
         self.main.after(1000 * 60, self.autoRotateImage)
 
     def handleClick(self, event):
-        if event.y < 100:
-            self.close_window()
-        else:
-            if event.x < 150:
-                self.rotateImage(-1)
-            elif event.x > 570:
+        point = (event.x, event.y)
+        quadrant = where_is_the_click(point)
+
+        match quadrant:
+            case 0:
+                self.close_window()
+            case 1:
                 self.rotateImage(1)
-            else: 
+            case 2:
                 self.show_data = not self.show_data
                 self.render_image()
+            case 3:
+                self.rotateImage(-1)
+            case _:
+                print("quadrant not clicked")
 
     def rotateImage(self, direction=1):
 
