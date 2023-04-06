@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkinter import messagebox
 from PIL import Image, ImageTk, ImageDraw, ImageFont
 from WeatherCat.weather import WeatherService
 from WeatherCat.ai import CatService, CatNotCreatedException

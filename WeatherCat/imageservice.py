@@ -1,5 +1,4 @@
-import sqlite3
-#----------------------------------------------------------------------
+
 class ImageDirectory():
     def __init__(self, conn):
         self.conn = conn
