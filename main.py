@@ -25,7 +25,7 @@ class MainWindow():
         self.generate_app_images()        
         self.image_on_canvas = self.canvas.create_image(0, 0, anchor='nw', image=self.loading_image)
 
-        
+        self.show_data = False
         self.main.attributes("-fullscreen", True)
         self.main.bind("<Escape>", lambda e: self.close_window())
         self.main.after(1000 * 5, self.fetchWeather)
@@ -82,6 +82,9 @@ class MainWindow():
                 self.rotateImage(-1)
             elif event.x > 620:
                 self.rotateImage(1)
+            else: 
+                self.show_data = not self.show_data
+                self.render_image()
 
     def rotateImage(self, direction=1):
 
@@ -101,11 +104,12 @@ class MainWindow():
             background = background.convert("RGBA")
             image_to_render = Image.new('RGBA',(720, 720),(255,255,255,0))
             draw = ImageDraw.Draw(image_to_render)
-            temperature = "{:.1f}°c".format(self.current_weather.temperature)
-            pressure = "{0}mb".format(self.current_weather.pressure)
-            width, height = draw.textsize(temperature,font=font)
-            draw.rectangle(((720 / 2)-((width / 2) + 20), (720 / 2) - ((height/2)+20), (720 / 2)+((width / 2)+20), (720 / 2)+((height / 2)+20)), fill=(255,255,255,127))
-            draw.text((720/2,720/2),temperature,(38,38,38),font, anchor="mm",  stroke_width=2, stroke_fill=(50,50,50,127))
+            if self.show_data:
+                temperature = "{:.1f}°c".format(self.current_weather.temperature)
+                pressure = "{0}mb".format(self.current_weather.pressure)
+                width, height = draw.textsize(temperature,font=font)
+                draw.rectangle(((720 / 2)-((width / 2) + 20), (720 / 2) - ((height/2)+20), (720 / 2)+((width / 2)+20), (720 / 2)+((height / 2)+20)), fill=(255,255,255,180))
+                draw.text((720/2,720/2),temperature,(38,38,38),font, anchor="mm")
 
             out = Image.alpha_composite(background, image_to_render)
             self.current_image = ImageTk.PhotoImage(out)
