@@ -97,15 +97,22 @@ class MainWindow():
     def render_image(self):
         try:
             font = ImageFont.truetype("fonts/Rubik-VariableFont_wght.ttf", 120, encoding="unic")
-            image_to_render = self.weather_images[self.weather_image_number]
+            background = self.weather_images[self.weather_image_number]
+            background = background.convert("RGBA")
+            image_to_render = Image.new('RGBA',(720, 720),(255,255,255,0))
             draw = ImageDraw.Draw(image_to_render)
             temperature = "{:.1f}°c".format(self.current_weather.temperature)
             pressure = "{0}mb".format(self.current_weather.pressure)
-            draw.text((720/2,720/2),temperature,(38,38,38),font, anchor="mm",  stroke_width=2, stroke_fill=(50,50,50))
-            self.current_image = ImageTk.PhotoImage(image_to_render)
+            width, height = draw.textsize(temperature,font=font)
+            draw.rectangle(((720 / 2)-((width / 2) + 20), (720 / 2) - ((height/2)+20), (720 / 2)+((width / 2)+20), (720 / 2)+((height / 2)+20)), fill=(255,255,255,127))
+            draw.text((720/2,720/2),temperature,(38,38,38),font, anchor="mm",  stroke_width=2, stroke_fill=(50,50,50,127))
+
+            out = Image.alpha_composite(background, image_to_render)
+            self.current_image = ImageTk.PhotoImage(out)
             self.canvas.itemconfig(self.image_on_canvas, image=self.current_image)
         except Exception as e:
             print("Could not rotate image")
+            print(e)
             pass
 
 
