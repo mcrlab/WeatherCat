@@ -107,7 +107,7 @@ class MainWindow():
 
         if event.x < 100 and event.y < 100:
             self.close_window()
-            
+
         quadrant = where_is_the_click(point)
 
         if quadrant == 0:
@@ -124,7 +124,7 @@ class MainWindow():
     def rotateData(self, direction=1):
         self.data_count += direction
         if self.data_count > 2:
-            self.data_count = -1
+            self.data_count = 0
         if self.data_count < 0:
             self.data_count = 2
         self.render_image()
