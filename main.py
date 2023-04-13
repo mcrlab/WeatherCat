@@ -104,23 +104,29 @@ class MainWindow():
 
     def handleClick(self, event):
         point = (event.x, event.y)
+
+        if event.x < 100 and event.y < 100:
+            self.close_window()
+            
         quadrant = where_is_the_click(point)
 
         if quadrant == 0:
-            self.close_window()
+            self.rotateData(-1)
         elif quadrant == 1:
             self.rotateImage(1)
         elif quadrant == 2:
-            self.rotateData()
+            self.rotateData(1)
         elif quadrant == 3:
             self.rotateImage(-1)
         else:
             print("quadrant not clicked")
     
-    def rotateData(self):
-        self.data_count += 1
+    def rotateData(self, direction=1):
+        self.data_count += direction
         if self.data_count > 2:
             self.data_count = -1
+        if self.data_count < 0:
+            self.data_count = 2
         self.render_image()
 
     def rotateImage(self, direction=1):
