@@ -1,10 +1,12 @@
 import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk, ImageDraw, ImageFont
-from WeatherCat.weather import WeatherService
+from WeatherCat.weather import WeatherService, ForecastDirectory
 from WeatherCat.ai import CatService, CatNotCreatedException
 from dotenv import load_dotenv
 import sqlite3
+import io
+import matplotlib.pyplot as plt
 
 load_dotenv()
 
@@ -42,6 +44,7 @@ class MainWindow():
         self.main = main
         conn = sqlite3.connect('images.db')
         self.cat_service = CatService(conn)
+        self.forecast_directory = ForecastDirectory(conn)
         self.weather_service = WeatherService()
 
         self.canvas = tk.Canvas(main, width=720, height=720, bd=0, highlightthickness=0, relief='ridge')
@@ -57,7 +60,7 @@ class MainWindow():
         self.main.attributes("-fullscreen", True)
         self.main.bind("<Escape>", lambda e: self.close_window())
         self.main.after(1000 * 5, self.fetchWeather)
-        self.main.after(1000 * 60, self.autoRotateImage)
+        #self.main.after(1000 * 60, self.autoRotateImage)
     
     def generate_app_images(self):
         i = Image.open('assets/error.jpg')
@@ -78,6 +81,7 @@ class MainWindow():
         try:
             retry_time = 60 * 15 # 15 minutes
             self.current_weather =  self.weather_service.fetch_weather()
+            self.forecast_directory.insert(self.current_weather)
             weather_description =self.current_weather.description
             self.weather_images = []
             images = self.cat_service.find_cats(weather_description)
@@ -99,8 +103,9 @@ class MainWindow():
             self.main.after(1000 * retry_time, self.fetchWeather)
 
     def autoRotateImage(self):
-        self.rotateImage(1)
-        self.main.after(1000 * 60, self.autoRotateImage)
+        pass
+        #self.rotateImage(1)
+        #self.main.after(1000 * 60, self.autoRotateImage)
 
     def handleClick(self, event):
         point = (event.x, event.y)
@@ -124,8 +129,8 @@ class MainWindow():
     def rotateData(self, direction=1):
         self.data_count += direction
         if self.data_count > 2:
-            self.data_count = 0
-        if self.data_count < 0:
+            self.data_count = -1
+        if self.data_count < -1:
             self.data_count = 2
         self.render_image()
 
@@ -140,30 +145,65 @@ class MainWindow():
             self.weather_image_number = 0
         self.render_image()
 
-    def render_image(self):
-        try:
-            font = ImageFont.truetype("fonts/Rubik-VariableFont_wght.ttf", 75, encoding="unic")
-            background = self.weather_images[self.weather_image_number]
-            background = background.convert("RGBA")
-            image_to_render = Image.new('RGBA',(720, 720),(255,255,255,0))
-            draw = ImageDraw.Draw(image_to_render)
-            if self.data_count > -1:
-                data = [
-                    "{:.1f}°c".format(self.current_weather.temperature),
-                    "{0}mb".format(self.current_weather.pressure),
-                    self.current_weather.description
-                ]
-                width, height = draw.textsize(data[self.data_count],font=font)
-                draw.rectangle(((720 / 2)-((width / 2) + 20), (720 / 2) - ((height/2)+20), (720 / 2)+((width / 2)+20), (720 / 2)+((height / 2)+20)), fill=(255,255,255,180))
-                draw.text((720/2,720/2),data[self.data_count],(38,38,38),font, anchor="mm")
 
-            out = Image.alpha_composite(background, image_to_render)
-            self.current_image = ImageTk.PhotoImage(out)
-            self.canvas.itemconfig(self.image_on_canvas, image=self.current_image)
-        except Exception as e:
-            print("Could not rotate image")
-            print(e)
-            pass
+    def get_chart(self, data_count):
+        plt.rcParams["figure.autolayout"] = True
+
+        px = 1/plt.rcParams['figure.dpi']  # pixel in inches
+        fig, ax = plt.subplots(figsize=(720*px, 720*px))
+        ax = plt.gca()
+
+        forecasts = self.forecast_directory.last()
+        timings = []
+        pressure = []
+        temperature = []
+        for forecast in forecasts:
+            timings.append(forecast[4])
+            pressure.append(forecast[1])
+            temperature.append(forecast[2])
+        if data_count == 1:
+            plt.plot(timings, pressure, color='white',  alpha=0.5, linestyle='dashed', linewidth=4)
+        else:
+            plt.plot(timings, temperature, color='white', alpha=0.5, linestyle='dashed', linewidth=4)
+
+        fig.patch.set_visible(False)
+        ax.get_xaxis().set_visible(False)
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+       # ax.axis('off')
+
+        img_buf = io.BytesIO()
+        plt.savefig(img_buf, format='png', transparent=True)
+
+        im = Image.open(img_buf)
+        #im.show(title="My Image")
+        #img_buf.close()
+        return im
+
+    def render_image(self):
+
+        font = ImageFont.truetype("fonts/Rubik-VariableFont_wght.ttf", 75, encoding="unic")
+        background = self.weather_images[self.weather_image_number]
+        background = background.convert("RGBA")
+        image_to_render = Image.new('RGBA',(720, 720),(255,255,255,0))
+        draw = ImageDraw.Draw(image_to_render)
+        if self.data_count > -1:
+            data = [
+                "{:.1f}°c".format(self.current_weather.temperature),
+                "{0}mb".format(self.current_weather.pressure),
+                self.current_weather.description
+            ]
+            height = 75
+            width = draw.textlength(data[self.data_count],font=font)
+            draw.rectangle(((720 / 2)-((width / 2) + 20), (720 / 2) - ((height/2)+20), (720 / 2)+((width / 2)+20), (720 / 2)+((height / 2)+20)), fill=(255,255,255,180))
+            draw.text((720/2,720/2),data[self.data_count],(38,38,38),font, anchor="mm")
+            if self.data_count == 0 or self.data_count == 1:
+                image_to_render = Image.alpha_composite(image_to_render, self.get_chart(self.data_count))
+        out = Image.alpha_composite(background, image_to_render)
+        self.current_image = ImageTk.PhotoImage(out)
+        self.canvas.itemconfig(self.image_on_canvas, image=self.current_image)
+
 
 
 #----------------------------------------------------------------------
