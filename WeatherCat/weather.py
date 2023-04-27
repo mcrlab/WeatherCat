@@ -1,36 +1,57 @@
 import os
 import requests
+import urllib.parse as parse
 from dotenv import load_dotenv
 load_dotenv()
-
-WEATHER_API=os.environ.get("WEATHER_API")
-LAT = os.environ.get("LAT")
-LON = os.environ.get("LON")
+HOST = os.environ.get("HOST")
 
 class WeatherService():
     def __init__(self):
         pass
     def fetch_weather(self):
         try:
-            a = requests.get("http://pi4.local:8086/query?prety=true&db=house&q=SELECT%20max(%22temperature%22),%20max(%22pressure%22)%20FROM%20%22forecast%22%20WHERE%20time%20%3E=%20now()%20-%201h%20GROUP%20BY%20time(1h)%20FILL(linear)")
+            query =  "SELECT max(\"temperature\"), max(\"pressure\") FROM \"forecast\" WHERE time >= now() - 1h GROUP BY time(1h) FILL(linear)"
+            a = requests.get("http://{0}:8086/query?prety=true&db=house&q={1}".format(HOST, parse.quote(query)))
             data = a.json()
-            print(data)
             temperature = data['results'][0]['series'][0]['values'][1][1]
             pressure =  data['results'][0]['series'][0]['values'][1][2]  
 
-            d = requests.get("http://pi4.local:8086/query?prety=true&db=house&q=SELECT%20description%20from%20forecast%20order%20by%20time%20desc%20limit%201")
+            query = "SELECT description from forecast order by time desc limit 1"
+            d = requests.get("http://{0}:8086/query?prety=true&db=house&q={1}".format(HOST, parse.quote(query)))
             data = d.json()
 
             weather_description = data['results'][0]['series'][0]['values'][0][1]
 
-            return WeatherForecast(temperature, weather_description, pressure)
+            return WeatherForecast("", temperature, weather_description, pressure)
         
         except Exception as e:
             print(e)
             return WeatherForecast(-1, "clear sky", -1)
 
+    def last24(self):
+        try:
+            query = "SELECT max(\"temperature\"), max(\"pressure\") FROM \"forecast\" WHERE time >= now() - 24h GROUP BY time(1h) FILL(linear) LIMIT 24"
+            query2 = "select distinct(\"description\") FROM \"forecast\" WHERE time >= now() - 24h GROUP BY time(1h) FILL(linear) LIMIT 24"
+            a = requests.get("http://{0}:8086/query?db=house&q={1}".format(HOST, parse.quote("{0};{1}".format(query,query2))))
+
+            data = a.json()
+            self.forecasts = []
+            
+            for i in range(0, len(data['results'][0]['series'][0]['values'])):
+                forecast = data['results'][0]['series'][0]['values'][i]
+                temperature = forecast[1]
+                pressure = forecast[2]
+                description = data['results'][1]['series'][0]['values'][i][1]
+                time =  forecast[0]
+                self.forecasts.append(WeatherForecast(time,temperature,description,pressure))
+            return self.forecasts
+        except Exception as e:
+            print(e)
+            return [] 
+        
 class WeatherForecast():
-    def __init__(self, temperature, description, pressure):
+    def __init__(self, time, temperature, description, pressure):
+        self.time = time
         self.temperature = temperature
         self.description = description
         self.pressure = pressure
@@ -39,38 +60,3 @@ class WeatherForecast():
 class WeatherNotLoadedException(Exception):
     """Weather not loaded"""
     pass
-
-
-class ForecastDirectory():
-    def __init__(self, conn):
-        self.conn = conn
-        c = self.conn.cursor()
-        c.execute("""CREATE TABLE IF NOT EXISTS forecast (
-            id INTEGER PRIMARY KEY AUTOINCREMENT, 
-            pressure FLOAT, 
-            temperature FLOAT,
-            description TEXT,
-            t TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )""")
-        
-    def insert(self, forecast):
-        c = self.conn.cursor()
-        
-        c.execute("INSERT INTO forecast (pressure, temperature, description) VALUES (?,?,?)", (forecast.pressure, forecast.temperature, forecast.description))
-        self.conn.commit()
-        pass
-    
-    def last(self):
-        a = requests.get("http://pi4.local:8086/query?prety=true&db=house&q=SELECT%20max(%22temperature%22),%20max(%22pressure%22)%20FROM%20%22forecast%22%20WHERE%20time%20%3E=%20now()%20-%2024h%20GROUP%20BY%20time(1h)%20FILL(linear)")
-        data = a.json()
-        print(data)
-        results = []
-        for value in data['results'][0]['series'][0]['values']:
-            results.append(("",value[2],value[1],"",value[0]))
-        return results
-    
-        c = self.conn.cursor()
-        c.execute("SELECT * FROM forecast LIMIT 20")
-        output = c.fetchall()
-        return output
-    

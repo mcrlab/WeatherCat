@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk, ImageDraw, ImageFont
-from WeatherCat.weather import WeatherService, ForecastDirectory
+from WeatherCat.weather import WeatherService
 from WeatherCat.ai import CatService, CatNotCreatedException
 from dotenv import load_dotenv
 import sqlite3
@@ -44,7 +44,6 @@ class MainWindow():
         self.main = main
         conn = sqlite3.connect('images.db')
         self.cat_service = CatService(conn)
-        self.forecast_directory = ForecastDirectory(conn)
         self.weather_service = WeatherService()
 
         self.canvas = tk.Canvas(main, width=720, height=720, bd=0, highlightthickness=0, relief='ridge')
@@ -81,7 +80,6 @@ class MainWindow():
         try:
             retry_time = 60 * 15 # 15 minutes
             self.current_weather =  self.weather_service.fetch_weather()
-            self.forecast_directory.insert(self.current_weather)
             weather_description =self.current_weather.description
             self.weather_images = []
             images = self.cat_service.find_cats(weather_description)
@@ -153,14 +151,16 @@ class MainWindow():
         fig, ax = plt.subplots(figsize=(720*px, 720*px))
         ax = plt.gca()
 
-        forecasts = self.forecast_directory.last()
+        forecasts = self.weather_service.last24()
+
         timings = []
         pressure = []
         temperature = []
+
         for forecast in forecasts:
-            timings.append(forecast[4])
-            pressure.append(forecast[1])
-            temperature.append(forecast[2])
+            timings.append(forecast.time)
+            pressure.append(forecast.pressure)
+            temperature.append(forecast.temperature)
         if data_count == 1:
             plt.plot(timings, pressure, color='white',  alpha=0.5, linestyle='dashed', linewidth=4)
         else:
@@ -171,7 +171,7 @@ class MainWindow():
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
         ax.spines['bottom'].set_visible(False)
-       # ax.axis('off')
+
 
         img_buf = io.BytesIO()
         plt.savefig(img_buf, format='png', transparent=True)
