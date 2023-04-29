@@ -45,7 +45,7 @@ class MainWindow():
         conn = sqlite3.connect('images.db')
         self.cat_service = CatService(conn)
         self.weather_service = WeatherService()
-
+        self.weather_image_number = 0
         self.canvas = tk.Canvas(main, width=720, height=720, bd=0, highlightthickness=0, relief='ridge')
         self.canvas.pack()
         self.canvas.grid(row=0, column=0)
@@ -188,6 +188,7 @@ class MainWindow():
 
         font = ImageFont.truetype("fonts/Rubik-VariableFont_wght.ttf", 75, encoding="unic")
         background = self.weather_images[self.weather_image_number]
+        print(bakc)
         background = background.convert("RGBA")
         image_to_render = Image.new('RGBA',(720, 720),(255,255,255,0))
         draw = ImageDraw.Draw(image_to_render)
