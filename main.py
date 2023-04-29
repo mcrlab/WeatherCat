@@ -188,7 +188,7 @@ class MainWindow():
 
         font = ImageFont.truetype("fonts/Rubik-VariableFont_wght.ttf", 75, encoding="unic")
         background = self.weather_images[self.weather_image_number]
-        print(bakc)
+        print(background)
         background = background.convert("RGBA")
         image_to_render = Image.new('RGBA',(720, 720),(255,255,255,0))
         draw = ImageDraw.Draw(image_to_render)
