@@ -2,6 +2,8 @@ import os
 import requests
 import urllib.parse as parse
 from dotenv import load_dotenv
+import time
+
 load_dotenv()
 HOST = os.environ.get("HOST")
 

@@ -58,7 +58,9 @@ class MainWindow():
 
         self.main.attributes("-fullscreen", True)
         self.main.bind("<Escape>", lambda e: self.close_window())
-        self.main.after(1000 * 5, self.fetchWeather)
+        self.canvas.tag_bind(self.image_on_canvas, '<Button-1>', lambda e: self.handleClick(e))
+
+        self.main.after(1000, self.fetchWeather)
         #self.main.after(1000 * 60, self.autoRotateImage)
     
     def generate_app_images(self):
@@ -92,7 +94,7 @@ class MainWindow():
             # set first image on canvas
             self.render_image()
 
-            self.canvas.tag_bind(self.image_on_canvas, '<Button-1>', lambda e: self.handleClick(e))
+            
         except (Exception, CatNotCreatedException) as e:
             print(e)
             self.canvas.itemconfig(self.image_on_canvas, image=self.error_image)
@@ -110,6 +112,7 @@ class MainWindow():
 
         if event.x < 100 and event.y < 100:
             self.close_window()
+            return
 
         quadrant = where_is_the_click(point)
 
@@ -212,5 +215,7 @@ if __name__ == "__main__":
         root = tk.Tk()
         MainWindow(root)
         root.mainloop()
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, Exception) as e:
+        print(e)
+        root.destroy()
         pass
