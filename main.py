@@ -49,6 +49,7 @@ class MainWindow():
         self.canvas = tk.Canvas(main, width=720, height=720, bd=0, highlightthickness=0, relief='ridge')
         self.canvas.pack()
         self.canvas.grid(row=0, column=0)
+
         
         self.generate_app_images()        
         self.image_on_canvas = self.canvas.create_image(0, 0, anchor='nw', image=self.loading_image)
@@ -86,9 +87,7 @@ class MainWindow():
             self.weather_images = []
             images = self.cat_service.find_cats(weather_description)
             for image in images:
-                i = Image.open(image[2])
-                resized_image = i.resize((720,720))
-                self.weather_images.append(resized_image)
+                self.weather_images.append(image[2])
     
             self.weather_image_number = 0
             # set first image on canvas
@@ -187,7 +186,9 @@ class MainWindow():
     def render_image(self):
 
         font = ImageFont.truetype("fonts/Rubik-VariableFont_wght.ttf", 75, encoding="unic")
-        background = self.weather_images[self.weather_image_number]
+        image_path = self.weather_images[self.weather_image_number]
+        i = Image.open(image_path)
+        background = i.resize((720,720))
         print(background)
         background = background.convert("RGBA")
         image_to_render = Image.new('RGBA',(720, 720),(255,255,255,0))
