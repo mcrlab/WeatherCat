@@ -36,6 +36,7 @@ def where_is_the_click(point):
         if in_a_triangle(triangle, point):
             return i
     return i
+
 class MainWindow():
 
     #----------------
@@ -50,6 +51,7 @@ class MainWindow():
         self.canvas.pack()
         self.canvas.grid(row=0, column=0)
 
+        self.weather_images = []
         
         self.generate_app_images()        
         self.image_on_canvas = self.canvas.create_image(0, 0, anchor='nw', image=self.loading_image)
@@ -145,44 +147,6 @@ class MainWindow():
             self.weather_image_number = 0
         self.render_image()
 
-
-    def get_chart(self, data_count):
-        plt.rcParams["figure.autolayout"] = True
-
-        px = 1/plt.rcParams['figure.dpi']  # pixel in inches
-        fig, ax = plt.subplots(figsize=(720*px, 720*px))
-        ax = plt.gca()
-
-        forecasts = self.weather_service.last24()
-
-        timings = []
-        pressure = []
-        temperature = []
-
-        for forecast in forecasts:
-            timings.append(forecast.time)
-            pressure.append(forecast.pressure)
-            temperature.append(forecast.temperature)
-        if data_count == 1:
-            plt.plot(timings, pressure, color='white',  alpha=0.5, linestyle='dashed', linewidth=4)
-        else:
-            plt.plot(timings, temperature, color='white', alpha=0.5, linestyle='dashed', linewidth=4)
-
-        fig.patch.set_visible(False)
-        ax.get_xaxis().set_visible(False)
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-        ax.spines['bottom'].set_visible(False)
-
-
-        img_buf = io.BytesIO()
-        plt.savefig(img_buf, format='png', transparent=True)
-
-        im = Image.open(img_buf)
-        #im.show(title="My Image")
-        #img_buf.close()
-        return im
-
     def render_image(self):
 
         font = ImageFont.truetype("fonts/Rubik-VariableFont_wght.ttf", 75, encoding="unic")
@@ -203,8 +167,7 @@ class MainWindow():
             width = draw.textlength(data[self.data_count],font=font)
             draw.rectangle(((720 / 2)-((width / 2) + 20), (720 / 2) - ((height/2)+20), (720 / 2)+((width / 2)+20), (720 / 2)+((height / 2)+20)), fill=(255,255,255,180))
             draw.text((720/2,720/2),data[self.data_count],(38,38,38),font, anchor="mm")
-            if self.data_count == 0 or self.data_count == 1:
-                image_to_render = Image.alpha_composite(image_to_render, self.get_chart(self.data_count))
+
         out = Image.alpha_composite(background, image_to_render)
         self.current_image = ImageTk.PhotoImage(out)
         self.canvas.itemconfig(self.image_on_canvas, image=self.current_image)
