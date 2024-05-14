@@ -6,7 +6,7 @@ import time
 
 load_dotenv()
 HOST = os.environ.get("HOST")
-DB   = os.engiron.get("DB") 
+DB   = os.environ.get("DB") 
 
 class WeatherService():
     def __init__(self):
