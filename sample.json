@@ -1,0 +1,26 @@
+{
+    "results": [
+        {
+            "statement_id": 0,
+            "series": [
+                {
+                    "name": "weather",
+                    "columns": [
+                        "time",
+                        "temperature",
+                        "pressure",
+                        "description"
+                    ],
+                    "values": [
+                        [
+                            "2024-05-15T19:00:00Z",
+                            15,
+                            1006,
+                            "Partly Cloudy"
+                        ]
+                    ]
+                }
+            ]
+        }
+    ]
+}

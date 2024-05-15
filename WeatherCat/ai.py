@@ -15,6 +15,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 class CatService():
     def __init__(self, conn):  
         self.directory = ImageDirectory(conn)
+        self.load_cats()
         pass
     
     def find_cats(self, description):
@@ -27,6 +28,18 @@ class CatService():
             images = self.create_cat(description)
         return images
     
+    def load_cats(self):
+        import glob
+        image_directory = glob.glob('images/*.jpg')
+
+        for image in image_directory:
+            if not self.directory.exists(image):
+                filename = image.split("/")[1]
+                name = (" ".join(filename.split('-')[0:-1]))
+                self.directory.insert(name, image)
+                print("Loading in new cat image: {0}".format(image))
+            pass
+
     def generate_cat_image(self, weather_description):
         try:
             print("creating new cat image for: {0}".format(weather_description))

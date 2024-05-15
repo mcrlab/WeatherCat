@@ -3,19 +3,28 @@ import requests
 import urllib.parse as parse
 from dotenv import load_dotenv
 import time
+import json
 
 load_dotenv()
 HOST = os.environ.get("HOST")
 DB   = os.environ.get("DB") 
+ENV  = os.environ.get("ENV")
 
 class WeatherService():
     def __init__(self):
         pass
     def fetch_weather(self):
         try:
-            query = """ SELECT temperature, pressure, description from weather where time > now() limit 1"""
-            a = requests.get("http://{0}:8086/query?prety=true&db={1}&q={2}".format(HOST, DB, parse.quote(query)))
-            data = a.json()
+            if ENV == 'development':
+                f = open("./sample.json", "r");
+                d = f.read()
+                f.close()
+                data = json.loads(d)
+            else:
+                query = """ SELECT temperature, pressure, description from weather where time > now() limit 1"""
+                a = requests.get("http://{0}:8086/query?prety=true&db={1}&q={2}".format(HOST, DB, parse.quote(query)))
+                data = a.json()
+
             forecast_time =         data['results'][0]['series'][0]['values'][0][0]
             temperature =           data['results'][0]['series'][0]['values'][0][1]
             pressure =              data['results'][0]['series'][0]['values'][0][2]

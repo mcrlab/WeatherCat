@@ -5,11 +5,10 @@ from WeatherCat.weather import WeatherService
 from WeatherCat.ai import CatService, CatNotCreatedException
 from dotenv import load_dotenv
 import sqlite3
-import io
 import matplotlib.pyplot as plt
-
+import os
 load_dotenv()
-
+ENV = os.environ.get("ENV")
 def in_a_triangle(triangle, point):
     x1,y1 = triangle[0] 
     x2,y2 = triangle[1]
@@ -58,13 +57,15 @@ class MainWindow():
 
         self.show_data = False
         self.data_count = -1
-
-        self.main.attributes("-fullscreen", True)
+    
+        if ENV == "production":
+            self.main.attributes("-fullscreen", True)
+    
         self.main.bind("<Escape>", lambda e: self.close_window())
         self.canvas.tag_bind(self.image_on_canvas, '<Button-1>', lambda e: self.handleClick(e))
 
         self.main.after(1000, self.fetchWeather)
-        #self.main.after(1000 * 60, self.autoRotateImage)
+        self.main.after(1000 * 60, self.autoRotateImage)
     
     def generate_app_images(self):
         i = Image.open('assets/error.jpg')
@@ -104,9 +105,8 @@ class MainWindow():
             self.main.after(1000 * retry_time, self.fetchWeather)
 
     def autoRotateImage(self):
-        pass
-        #self.rotateImage(1)
-        #self.main.after(1000 * 60, self.autoRotateImage)
+        self.rotateImage(1)
+        self.main.after(1000 * 60, self.autoRotateImage)
 
     def handleClick(self, event):
         point = (event.x, event.y)
@@ -153,7 +153,6 @@ class MainWindow():
         image_path = self.weather_images[self.weather_image_number]
         i = Image.open(image_path)
         background = i.resize((720,720))
-        print(background)
         background = background.convert("RGBA")
         image_to_render = Image.new('RGBA',(720, 720),(255,255,255,0))
         draw = ImageDraw.Draw(image_to_render)

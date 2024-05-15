@@ -21,6 +21,12 @@ class ImageDirectory():
         output = c.fetchall()
         return output
     
+    def exists(self, path):
+        c = self.conn.cursor()
+        c.execute("SELECT * FROM images where path =?",(path,))
+        output = c.fetchall()
+        return len(output)>0
+    
     def all(self):
         c = self.conn.cursor()
         c.execute("SELECT * FROM images")
