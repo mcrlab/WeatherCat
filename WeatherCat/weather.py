@@ -21,17 +21,20 @@ class WeatherService():
                 f.close()
                 data = json.loads(d)
             else:
-                query = """ SELECT temperature, pressure, description, precipitation from weather where time > now() limit 1"""
+                query = """ SELECT temperature, pressure, description, precipitation from weather where time > now() limit 6"""
                 a = requests.get("http://{0}:8086/query?prety=true&db={1}&q={2}".format(HOST, DB, parse.quote(query)))
                 data = a.json()
-
-            forecast_time =         data['results'][0]['series'][0]['values'][0][0]
-            temperature =           data['results'][0]['series'][0]['values'][0][1]
-            pressure =              data['results'][0]['series'][0]['values'][0][2]
-            weather_description =   data['results'][0]['series'][0]['values'][0][3]
-            precipitation =         data['results'][0]['series'][0]['values'][0][4]
-
-            return WeatherForecast(forecast_time, temperature, weather_description, pressure, precipitation)
+            print(data)
+            forecasts = []
+            for i in range(0,5):
+                forecast_time =         data['results'][0]['series'][0]['values'][i][0]
+                temperature =           data['results'][0]['series'][0]['values'][i][1]
+                pressure =              data['results'][0]['series'][0]['values'][i][2]
+                weather_description =   data['results'][0]['series'][0]['values'][i][3]
+                precipitation =         data['results'][0]['series'][0]['values'][i][4]
+                forecasts.append(WeatherForecast(forecast_time, temperature, weather_description, pressure, precipitation))
+            print(len(forecasts))
+            return forecasts
         
         except Exception as e:
             print(e)

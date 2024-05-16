@@ -86,8 +86,8 @@ class MainWindow():
     def fetchWeather(self):
         try:
             retry_time = 60 * 15 # 15 minutes
-            self.current_weather =  self.weather_service.fetch_weather()
-            weather_description =self.current_weather.description
+            self.forecasts =  self.weather_service.fetch_weather()
+            weather_description =self.forecasts[0].description
             self.weather_images = []
             images = self.cat_service.find_cats(weather_description)
             for image in images:
@@ -163,15 +163,24 @@ class MainWindow():
         draw = ImageDraw.Draw(image_to_render)
         if self.data_count > -1:
             data = [
-                "{:.1f}°c".format(self.current_weather.temperature),
-                "{0}mb".format(self.current_weather.pressure),
-                self.current_weather.description,
-                "{0}%".format(self.current_weather.precipitation),
+                "{0}°c".format(self.forecasts[0].temperature),
+                "{0}mb".format(self.forecasts[0].pressure),
+                self.forecasts[0].description,
+                "{0}%".format(self.forecasts[0].precipitation),
             ]
             height = 75
             width = draw.textlength(data[self.data_count],font=font)
             draw.rectangle(((720 / 2)-((width / 2) + 20), (720 / 2) - ((height/2)+20), (720 / 2)+((width / 2)+20), (720 / 2)+((height / 2)+20)), fill=(255,255,255,180))
+            
             draw.text((720/2,720/2),data[self.data_count],(38,38,38),font, anchor="mm")
+        draw.rectangle((0, 720 - (720/5), 720, 720), fill=(255,255,255,100))
+        small_font = ImageFont.truetype("fonts/Rubik-VariableFont_wght.ttf", 35, encoding="unic")
+        for i in range(0,len(self.forecasts)):
+            try:
+                draw.text((((720/5) * i)+72,720 - (720/10)),"{0}°c".format(self.forecasts[i].temperature),(38,38,38),small_font, anchor="mm")
+            except Exception as e:
+                draw.text((((720/5) * i)+72,720 - (720/10)),"-",(38,38,38),small_font, anchor="mm")
+            pass
 
         out = Image.alpha_composite(background, image_to_render)
         self.current_image = ImageTk.PhotoImage(out)

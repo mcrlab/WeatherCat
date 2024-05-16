@@ -1,26 +1,63 @@
 {
     "results": [
-        {
-            "statement_id": 0,
-            "series": [
-                {
-                    "name": "weather",
-                    "columns": [
-                        "time",
-                        "temperature",
-                        "pressure",
-                        "description"
-                    ],
-                    "values": [
-                        [
-                            "2024-05-15T19:00:00Z",
-                            15,
-                            1006,
-                            "Partly Cloudy"
-                        ]
-                    ]
-                }
-            ]
-        }
+    {
+    "statement_id": 0,
+    "series": [
+    {
+    "name": "weather",
+    "columns": [
+    "time",
+    "temperature",
+    "pressure",
+    "description",
+    "precipitation"
+    ],
+    "values": [
+    [
+    "2024-05-16T14:00:00Z",
+    15,
+    1005,
+    "Light Rain",
+    76
+    ],
+    [
+    "2024-05-16T15:00:00Z",
+    15,
+    1005,
+    "Light Rain",
+    87
+    ],
+    [
+    "2024-05-16T16:00:00Z",
+    15,
+    1005,
+    "Light Rain",
+    81
+    ],
+    [
+    "2024-05-16T17:00:00Z",
+    15,
+    1004,
+    "Light Rain Showers",
+    75
+    ],
+    [
+    "2024-05-16T18:00:00Z",
+    15,
+    1004,
+    "Light Rain Showers",
+    79
+    ],
+    [
+    "2024-05-16T19:00:00Z",
+    15,
+    1005,
+    "Light Rain Showers",
+    73
     ]
-}
+    ]
+    }
+    ]
+    }
+    ]
+    }
