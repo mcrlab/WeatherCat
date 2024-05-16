@@ -52,6 +52,7 @@ class MainWindow():
 
     def render_image(self):
         global fps
+        text = "James"
         now = current_milli_time()
         delta = (now - self.last_render) / 1000
         
@@ -59,16 +60,13 @@ class MainWindow():
         image_to_render = Image.new('RGBA',(720, 720),(255,255,255,0))
         draw = ImageDraw.Draw(image_to_render)
 
-        height = 75
-        width = draw.textlength("James",font=font)
+        width = draw.textlength(text,font=font)
         x0 = (720 / 2)-((width / 2) + 20)
         y0 = self.y - (75/2)
         x1 = (720 / 2)+((width / 2) + 20)
         y1 = self.y + (75/2)
         draw.rectangle((x0, y0,x1, y1), fill=(255,255,255,180))
- 
-#        draw.rectangle(((720 / 2)-((width / 2) + 20), ((height/2)+20 + self.y), (720 / 2)+((width / 2)+20), ((height / 2)+20 + self.y)), fill=(255,255,255,180))
-        draw.text((720/2,self.y),"James",(38,38,38),font, anchor="mm")
+        draw.text((720/2,self.y),text,(38,38,38),font, anchor="mm")
 
         out = Image.alpha_composite(self.resized_image, image_to_render)
         self.current_image = ImageTk.PhotoImage(out)

@@ -66,6 +66,7 @@ class MainWindow():
 
         self.main.after(1000, self.fetchWeather)
         self.main.after(1000 * 60, self.autoRotateImage)
+        self.main.after(1000 * 10, self.autoRotateData);
     
     def generate_app_images(self):
         i = Image.open('assets/error.jpg')
@@ -103,6 +104,10 @@ class MainWindow():
             retry_time = 60 * 1
         finally:
             self.main.after(1000 * retry_time, self.fetchWeather)
+
+    def autoRotateData(self):
+        self.rotateData(1)
+        self.main.after(1000 * 10, self.autoRotateData)
 
     def autoRotateImage(self):
         self.rotateImage(1)
