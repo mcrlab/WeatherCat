@@ -135,10 +135,10 @@ class MainWindow():
     
     def rotateData(self, direction=1):
         self.data_count += direction
-        if self.data_count > 2:
+        if self.data_count > 3:
             self.data_count = -1
         if self.data_count < -1:
-            self.data_count = 2
+            self.data_count = 3
         self.render_image()
 
     def rotateImage(self, direction=1):
@@ -165,7 +165,8 @@ class MainWindow():
             data = [
                 "{:.1f}°c".format(self.current_weather.temperature),
                 "{0}mb".format(self.current_weather.pressure),
-                self.current_weather.description
+                self.current_weather.description,
+                "{0}%".format(self.current_weather.precipitation),
             ]
             height = 75
             width = draw.textlength(data[self.data_count],font=font)
