@@ -1,4 +1,6 @@
-import openai
+from openai import OpenAI
+
+client = OpenAI()
 import shutil
 from slugify import slugify
 from WeatherCat.imageservice import ImageDirectory
@@ -8,8 +10,8 @@ import time
 from dotenv import load_dotenv
 
 load_dotenv()
-openai.organisation = os.getenv('ORG')
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# TODO: The 'openai.organisation' option isn't read in the client API. You will need to pass it when you instantiate the client, e.g. 'OpenAI(organisation=os.getenv('ORG'))'
+# openai.organisation = os.getenv('ORG')
 
 
 class CatService():
@@ -17,7 +19,7 @@ class CatService():
         self.directory = ImageDirectory(conn)
         self.load_cats()
         pass
-    
+
     def find_cats(self, description):
         images = self.directory.find(description)
         if len(images) > 10:
@@ -27,7 +29,7 @@ class CatService():
             # no images for that found - create a new one
             images = self.create_cat(description)
         return images
-    
+
     def load_cats(self):
         import glob
         image_directory = glob.glob('images/*.jpg')
@@ -45,16 +47,15 @@ class CatService():
             print("creating new cat image for: {0}".format(weather_description))
             prompt = "some cats in {0}".format(weather_description)
 
-            response = openai.Image.create(
-                prompt=prompt,
-                n=1,
-                size="512x512"
-            )
-            image_url = response['data'][0]['url']
+            response = client.images.generate(prompt=prompt,
+            n=1,
+            size="512x512")
+            image_url = response.data[0].url
             return image_url
         except Exception as e:
+            print(e)
             raise Exception("Failed to generate a cat image")
-            
+
     def create_cat(self, weather_description):
         try:
             image_url = self.generate_cat_image(weather_description)
@@ -73,7 +74,7 @@ class CatService():
             return self.directory.find(weather_description)
         except Exception as e:
             raise CatNotCreatedException("Can't generate a new cat")
-        
+
 
 class CatNotCreatedException(Exception):
     "cat could not be created"
