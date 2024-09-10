@@ -10,7 +10,7 @@ class Assistant():
         self.client = OpenAI()
     
     def summarise(self, forecasts):
-        json_data = json.dumps(forecasts, default=lambda x: x.__dict__)
+        json_data = json.dumps(forecasts)
         request = "summarise the weather in 100 characters from the following json structure " + json_data
 
         completion = self.client.chat.completions.create(

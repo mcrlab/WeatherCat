@@ -13,7 +13,32 @@ ENV  = os.environ.get("ENV")
 class WeatherService():
     def __init__(self):
         pass
+
     def fetch_weather(self):
+        try:
+            query = """select * from weather where time > now() limit 12"""
+            a = requests.get("http://{0}:8086/query?prety=true&db={1}&q={2}".format(HOST, DB, parse.quote(query)))
+            data = a.json()
+            series = data['results'][0]['series'][0]['columns']
+            forecastData = data['results'][0]['series'][0]['values']
+
+            print(series)
+            forecasts = []
+            for forecast in forecastData:
+                forecastObject = {}
+                x = -1
+                for key in series:
+                    x = x + 1
+                    forecastObject[key]=forecast[x]
+                
+                forecasts.append(forecastObject)
+                
+            return forecasts
+        
+        except Exception as e:
+            print(e)
+
+    def fetch_weather_old(self):
         try:
             if ENV == 'development!':
                 print('loading dev data')

@@ -43,7 +43,7 @@ class WeatherModel:
     
     def next_image(self):
         self.image_index = self.image_index + 1
-        if(self.image_index > len(self.images)):
+        if(self.image_index >= len(self.images)):
             self.image_index = 0
         return self.images[self.image_index][2]
     
@@ -148,8 +148,8 @@ class WeatherController:
         if ENV == "production":
             self.root.attributes("-fullscreen", True)
 
-        self.root.after(1000, self.fetchWeather)
-        #self.main.after(1000 * 60, self.autoRotateImage)
+        self.root.after(500, self.fetchWeather)
+
 
     def handleClick(self, event):
         point = (event.x, event.y)
@@ -160,14 +160,14 @@ class WeatherController:
 
         quadrant = self.view.where_is_the_click(point)
         self.rotateImage()
-        print(quadrant)
+
 
     def fetchWeather(self):
         try:
             retry_time = 60 * 60
             self.model.set_forecasts(self.weather_service.fetch_weather())
             self.model.set_summary(self.assistant.summarise(self.model.get_forecasts()))
-            latest_description =self.model.get_latest_forecast().description
+            latest_description =self.model.get_latest_forecast()['description']
             self.model.set_images(self.cat_service.find_cats(latest_description))
             image = Image.open(self.model.next_image())
             self.view.render_image(self.model.get_summary(), image)
@@ -184,12 +184,6 @@ class WeatherController:
     def rotateImage(self):
         image = Image.open(self.model.next_image())
         self.view.render_image(self.model.get_summary(), image)
-        pass
-
-    def autoRotateImage(self):
-        pass
-    
-    def autoRotateData(self):
         pass
 
     def close_window(self):
