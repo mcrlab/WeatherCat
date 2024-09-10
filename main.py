@@ -15,7 +15,38 @@ ENV = os.environ.get("ENV")
 class WeatherModel:
     def __init__(self):
         self.forecasts = []
+        self.images = []
+        self.summary = ""
+        self.image_index = -1
         pass
+
+    def set_forecasts(self, forecasts):
+        self.forecasts = forecasts
+    
+    def get_forecasts(self):
+        return self.forecasts
+    
+    def get_latest_forecast(self):
+        return self.forecasts[0]
+    
+    def set_summary(self, summary):
+        self.summary = summary
+    
+    def get_summary(self):
+        return self.summary
+    
+    def set_images(self, images):
+        self.images = images
+    
+    def current_image(self):
+        return self.images[self.image_index][2]
+    
+    def next_image(self):
+        self.image_index = self.image_index + 1
+        if(self.image_index > len(self.images)):
+            self.image_index = 0
+        return self.images[self.image_index][2]
+    
 
 class WeatherView:
     def __init__(self, root, controller):
@@ -128,18 +159,18 @@ class WeatherController:
             return
 
         quadrant = self.view.where_is_the_click(point)
-        
+        self.rotateImage()
         print(quadrant)
 
     def fetchWeather(self):
         try:
             retry_time = 60 * 60
-            self.forecasts = self.weather_service.fetch_weather()
-            message = self.assistant.summarise(self.forecasts)
-            latest_description =self.forecasts[0].description
-            self.images = self.cat_service.find_cats(latest_description)
-            image = Image.open(self.images[0][2])
-            self.view.render_image(message, image)
+            self.model.set_forecasts(self.weather_service.fetch_weather())
+            self.model.set_summary(self.assistant.summarise(self.model.get_forecasts()))
+            latest_description =self.model.get_latest_forecast().description
+            self.model.set_images(self.cat_service.find_cats(latest_description))
+            image = Image.open(self.model.next_image())
+            self.view.render_image(self.model.get_summary(), image)
             pass
         except Exception as e:
             pass
@@ -151,8 +182,10 @@ class WeatherController:
         pass
 
     def rotateImage(self):
-        
+        image = Image.open(self.model.next_image())
+        self.view.render_image(self.model.get_summary(), image)
         pass
+
     def autoRotateImage(self):
         pass
     
