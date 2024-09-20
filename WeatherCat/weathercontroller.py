@@ -41,19 +41,15 @@ class WeatherController:
 
         quadrant = self.view.where_is_the_click(point)
   
-        match (quadrant):
-            case 0:
-                self.rotateData(-1)
-            case 1:
-                self.rotateImage(1)
-                pass
-            case 2:
-                self.rotateData(1)
-                pass
-            case 3:
-                self.rotateImage(-1)
-                pass        
-
+        if (quadrant == 0):
+            self.rotateData(-1)
+        elif (quadrant == 1):
+            self.rotateImage(1)
+        elif (quadrant ==  2):
+            self.rotateData(1)
+        elif (quadrant ==  3):
+            self.rotateImage(-1)
+                
     def fetchWeather(self):
         try:
             retry_time = 60 * 60
