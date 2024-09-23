@@ -46,12 +46,25 @@ class WeatherModel:
                 return self.summary
             else:
                 key = options[self.description_index]
-                return key + ": " + str(self.forecasts[0][key])
+
+                return self.format(key, str(self.forecasts[0][key]))
 
         except Exception as e:
             print(e)
             return "fail"
-        
+    
+    def format(self, key, data):
+        if(key == "wind speed"):
+            return "{0}mph".format(data)
+        elif(key == "humidity" or key == "precipitation"):
+            return "{0}%".format(data)
+        elif(key == "pressure"):
+            return "{0}mb"
+        elif(key == "temperature"):
+            return "{0}c"
+        else:
+            return data
+    
     def next_description(self, direction = 1):
         try:
             self.description_index = self.description_index + direction
