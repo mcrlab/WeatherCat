@@ -56,12 +56,14 @@ class WeatherModel:
     def format(self, key, data):
         if(key == "wind speed"):
             return "{0}mph".format(data)
-        elif(key == "humidity" or key == "precipitation"):
-            return "{0}%".format(data)
+        elif(key == "humidity"):
+            return "{0}% humidity".format(data)
+        elif(key == "precipitation"):
+            return "{0}% chance of rain".format(data)
         elif(key == "pressure"):
-            return "{0}mb"
+            return "{0}mb".format(data)
         elif(key == "temperature"):
-            return "{0}c"
+            return "{0}c".format(data)
         else:
             return data
     
@@ -76,11 +78,11 @@ class WeatherModel:
                 return self.summary
             elif(self.description_index < len(options)):
                 key = options[self.description_index]
-                return key + ": " + str(self.forecasts[0][key])
+                return self.format(key, str(self.forecasts[0][key]))
             else:
                 self.description_index = 0
                 key = options[self.description_index]
-                return key + ": " + str(self.forecasts[0][key])
+                return self.format(key, str(self.forecasts[0][key]))
         except Exception as e:
             print(e)
             return "error"        
