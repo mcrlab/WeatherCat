@@ -62,8 +62,10 @@ class WeatherModel:
             return "{0}% chance of rain".format(data)
         elif(key == "pressure"):
             return "{0}mb".format(data)
+        elif(key == "visibility"):
+            return "{0} visibility".format(data)
         elif(key == "temperature"):
-            return "{0}c".format(data)
+            return "{0}°c".format(data)
         else:
             return data
     
