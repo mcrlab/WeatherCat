@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 from WeatherCat.weathermodel import WeatherModel
 from WeatherCat.weatherview import WeatherView
 from assistant import Assistant
@@ -30,13 +31,14 @@ class WeatherController:
             self.root.attributes("-fullscreen", True)
 
         self.root.after(500, self.fetchWeather)
+        self.root.after(10 * 1000, self.autoRotateImage)
 
 
     def handleClick(self, event):
         point = (event.x, event.y)
 
         if event.x < 100 and event.y < 100:
-            self.controller.close_window()
+            self.close_window()
             return
 
         quadrant = self.view.where_is_the_click(point)
@@ -66,19 +68,22 @@ class WeatherController:
             pass
             self.root.after(1000 * retry_time, self.fetchWeather)
 
-    def rotateData(self, direction):
+    def rotateData(self, direction=1):
         image = self.model.current_image()
         text = self.model.next_description(direction)
         self.view.render_image(text, image)
         pass
 
-    def rotateImage(self, direction):
+    def rotateImage(self, direction=1):
         image = self.model.next_image(direction)
         text = self.model.get_description()
         self.view.render_image(text, image)
         pass
 
+    def autoRotateImage(self):
+        self.root.after(10 * 1000, self.rotateImage)
+
     def close_window(self):
-        msg_box = tk.messagebox.askquestion('Exit Application', 'Are you sure you want to exit the application?',icon='warning')
+        msg_box = messagebox.askquestion('Exit Application', 'Are you sure you want to exit the application?',icon='warning')
         if msg_box == 'yes':
             self.root.destroy()

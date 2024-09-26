@@ -15,9 +15,10 @@ class WeatherService():
 
     def fetch_weather(self):
         try:
-            query = """select * from weather where time > now() limit 12"""
+            query = """select "description", "humidity", "precipitation", "pressure", "temperature", "visibility", "wind description", "wind speed" from weather where time > now() limit 12"""
             a = requests.get("http://{0}:8086/query?prety=true&db={1}&q={2}".format(HOST, DB, parse.quote(query)))
             data = a.json()
+            print(data)
             series = data['results'][0]['series'][0]['columns']
             forecastData = data['results'][0]['series'][0]['values']
             forecasts = []
