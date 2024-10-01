@@ -65,8 +65,8 @@ class WeatherController:
         except Exception as e:
             pass
         finally:
-            pass
             self.root.after(1000 * retry_time, self.fetchWeather)
+            pass
 
     def rotateData(self, direction=1):
         image = self.model.current_image()
